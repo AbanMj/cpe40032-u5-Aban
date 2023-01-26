@@ -1,0 +1,75 @@
+using System.Numerics;
+using System.Security.Cryptography;
+using System;
+using System.Runtime.Versioning;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Vector3 = UnityEngine.Vector3;
+
+public class Target : MonoBehaviour
+{
+    private Rigidbody targetRb;
+    private GameManager gameManager;
+    private float minSpeed = 8;
+    private float maxSpeed = 16;
+    private float maxTorque = 4;
+    private float xRange = 4;
+    private float ySpawnPos = -1;
+
+    public ParticleSystem explosionParticle;
+    public int pointValue;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        targetRb = GetComponent<Rigidbody>();
+        gameManager = GameObject.Find("Game Manager").GetComponent<GameManager>();
+        targetRb.AddForce(RandomForce(), ForceMode.Impulse);
+        targetRb.AddTorque(RandomTorque(), RandomTorque(), RandomTorque(), ForceMode.Impulse);
+
+        transform.position = RandomSpawnPos();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+       
+    }
+
+    private void OnMouseDown()
+    {
+        if(gameManager.isGameActive)
+        {
+            Destroy(gameObject);
+            Instantiate(explosionParticle, transform.position, explosionParticle.transform.rotation);
+            gameManager.UpdateScore(pointValue);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other) 
+    {
+        Destroy(gameObject);
+
+        if(!gameObject.CompareTag("Bad"))
+        {
+            gameManager.GameOver();
+        }
+        
+    }
+
+    Vector3 RandomForce()
+    {
+         return Vector3.up * UnityEngine.Random.Range(minSpeed, maxSpeed);
+    }
+
+    float RandomTorque()
+    {
+        return UnityEngine.Random.Range(-maxTorque, maxTorque);
+    }
+
+    Vector3 RandomSpawnPos()
+    {
+        return new Vector3(UnityEngine.Random.Range(-xRange, xRange), ySpawnPos);
+    }
+}
